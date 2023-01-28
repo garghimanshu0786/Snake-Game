@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -85,7 +87,7 @@ fun GameOptions(reset: () -> Unit, changeSpeed: (Boolean) -> Unit) {
 				.fillMaxWidth()
 				.weight(1f)
 		) {
-			Text("Speed Down")
+			Text("Slow Down")
 		}
 	}
 }
@@ -104,11 +106,11 @@ fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
 			}
 			Spacer(modifier = buttonSize)
 			Button(onClick = { onDirectionChange(Pair(1, 0)) }, modifier = buttonSize) {
-				Icon(Icons.Default.KeyboardArrowUp, null)
+				Icon(Icons.Default.KeyboardArrowRight, null)
 			}
 		}
 		Button(onClick = { onDirectionChange(Pair(0, 1)) }, modifier = buttonSize) {
-			Icon(Icons.Default.KeyboardArrowUp, null)
+			Icon(Icons.Default.KeyboardArrowDown, null)
 		}
 	}
 }
