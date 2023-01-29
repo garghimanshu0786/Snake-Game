@@ -14,16 +14,19 @@ import java.util.*
 class GameViewModel : ViewModel() {
 	private val mutex = Mutex()
 	private val mutableState =
-		MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7)), score = 0))
+		MutableStateFlow(State(food = getRandomPair(), snake = listOf(getRandomPair()), score = 0))
+
 	val state: StateFlow<State> = mutableState
 
-	var snakeLength = 4
+	private var snakeLength = 4
 
 	var move = Pair(1, 0)
 		set(value) {
 			viewModelScope.launch {
 				mutex.withLock {
-					field = value
+					if (field.first != -value.first && field.second != -value.second) {
+						field = value
+					}
 				}
 			}
 		}
@@ -46,12 +49,23 @@ class GameViewModel : ViewModel() {
 			}
 		}
 
+	private fun getRandomPair() = Pair(
+		Random().nextInt(BOARD_SIZE),
+		Random().nextInt(BOARD_SIZE),
+	)
+
 	fun resetGame() {
 		snakeLength = 4
 		delayTime = 350L
 		move = Pair(1, 0)
 		viewModelScope.launch {
-			mutableState.emit(State(food = Pair(5, 5), snake = listOf(Pair(7, 7)), score = 0))
+			mutableState.emit(
+				State(
+					food = getRandomPair(),
+					snake = listOf(getRandomPair()),
+					score = 0
+				)
+			)
 		}
 	}
 
@@ -59,32 +73,41 @@ class GameViewModel : ViewModel() {
 		viewModelScope.launch {
 			while (true) {
 				delay(delayTime)
-				mutableState.update {
-					val newPosition = it.snake.first().let {
-						mutex.withLock {
-							Pair(
-								(it.first + move.first + BOARD_SIZE) % BOARD_SIZE,
-								(it.second + move.second + BOARD_SIZE) % BOARD_SIZE
-							)
+				val newPosition = mutableState.value.snake.first().let {
+					mutex.withLock {
+						Pair(
+							(it.first + move.first + BOARD_SIZE) % BOARD_SIZE,
+							(it.second + move.second + BOARD_SIZE) % BOARD_SIZE
+						)
+					}
+				}
+				if (mutableState.value.snake.contains(newPosition)) {
+					resetGame()
+				} else {
+					mutableState.update {
+						var score = it.score
+						if (newPosition == it.food) {
+							snakeLength++
+							score++
+							delayTime -= 10L
 						}
-					}
-					var score = it.score
-					if (newPosition == it.food) {
-						snakeLength++
-						score++
-					}
 
-					if (it.snake.contains(newPosition)) {
-						snakeLength = 4
+						val food = if (newPosition == it.food) {
+							var pair = getRandomPair()
+							while (it.snake.contains(pair)) {
+								pair = getRandomPair()
+							}
+							pair
+						} else {
+							it.food
+						}
+
+						it.copy(
+							food = food,
+							snake = listOf(newPosition) + it.snake.take(snakeLength - 1),
+							score = score
+						)
 					}
-					it.copy(
-						food = if (newPosition == it.food) Pair(
-							Random().nextInt(BOARD_SIZE),
-							Random().nextInt(BOARD_SIZE),
-						) else it.food,
-						snake = listOf(newPosition) + it.snake.take(snakeLength - 1),
-						score = score
-					)
 				}
 			}
 		}
