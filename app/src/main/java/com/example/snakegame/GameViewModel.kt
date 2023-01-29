@@ -3,7 +3,9 @@ package com.example.snakegame
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,6 +19,9 @@ class GameViewModel : ViewModel() {
 		MutableStateFlow(State(food = getRandomPair(), snake = listOf(getRandomPair()), score = 0))
 
 	val state: StateFlow<State> = mutableState
+
+	private val _uiEvent = MutableSharedFlow<Unit>()
+	val uiEvent: SharedFlow<Unit> = _uiEvent
 
 	private var snakeLength = 4
 
@@ -32,15 +37,17 @@ class GameViewModel : ViewModel() {
 		}
 
 	fun changeSpeed(up: Boolean) {
-		if (up && delayTime > 50L) {
-			delayTime -= 50L
+		if (up) {
+			if (delayTime > 50L)
+				delayTime -= 50L
 		} else {
-			delayTime += 50L
+			if (delayTime < 400L)
+				delayTime += 50L
 		}
 	}
 
 
-	private var delayTime: Long = 350L
+	var delayTime: Long = 400L
 		set(value) {
 			viewModelScope.launch {
 				mutex.withLock {
@@ -56,7 +63,7 @@ class GameViewModel : ViewModel() {
 
 	fun resetGame() {
 		snakeLength = 4
-		delayTime = 350L
+		delayTime = 400L
 		move = Pair(1, 0)
 		viewModelScope.launch {
 			mutableState.emit(
@@ -82,6 +89,7 @@ class GameViewModel : ViewModel() {
 					}
 				}
 				if (mutableState.value.snake.contains(newPosition)) {
+					_uiEvent.emit(Unit)
 					resetGame()
 				} else {
 					mutableState.update {

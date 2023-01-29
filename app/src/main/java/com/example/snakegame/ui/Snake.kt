@@ -1,5 +1,9 @@
 package com.example.snakegame.ui
 
+import android.content.Context
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -24,36 +28,66 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Green
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.snakegame.GameViewModel
 import com.example.snakegame.GameViewModel.Companion.BOARD_SIZE
+import com.example.snakegame.R
 import com.example.snakegame.State
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun Snake(game: GameViewModel) {
 	val state by game.state.collectAsState(initial = null)
+	val context = LocalContext.current
 
 	Column(horizontalAlignment = Alignment.CenterHorizontally) {
 		state?.let { Board(it) }
 
-		ScoreBoard(state?.score)
+		ScoreBoard(state?.score, game.delayTime)
 
 		Buttons { game.move = it }
 
 		GameOptions(game::resetGame, game::changeSpeed)
 	}
+
+	LaunchedEffect(context) {
+		game.uiEvent.collectLatest {
+			Toast.makeText(
+				context, context.getString(R.string.game_over), Toast.LENGTH_SHORT
+			).show()
+			val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+			vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+		}
+	}
 }
 
 @Composable
-fun ScoreBoard(score: Int?) {
+fun ScoreBoard(score: Int?, delayTime: Long) {
 	Row {
 		Text("Score: ")
 		Text(text = score.toString())
+
+		Text("Level: ", Modifier.padding(start = 20.dp))
+		Text(
+			when (delayTime) {
+				in 400L..Long.MAX_VALUE -> 1
+				in 299L..350L -> 2
+				in 349L downTo 300L -> 3
+				in 299L downTo 250L -> 4
+				in 240L downTo 200L -> 5
+				in 199L downTo 150L -> 6
+				in 149L downTo 100L -> 7
+				in Long.MIN_VALUE..99L -> 8
+				else -> 1
+			}.toString()
+		)
 	}
 }
 
@@ -77,7 +111,7 @@ fun GameOptions(reset: () -> Unit, changeSpeed: (Boolean) -> Unit) {
 				.fillMaxWidth()
 				.weight(1f)
 		) {
-			Text("Speed Up")
+			Text("Level Up")
 		}
 
 		Button(
@@ -87,7 +121,7 @@ fun GameOptions(reset: () -> Unit, changeSpeed: (Boolean) -> Unit) {
 				.fillMaxWidth()
 				.weight(1f)
 		) {
-			Text("Slow Down")
+			Text("Level Down")
 		}
 	}
 }
