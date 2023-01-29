@@ -1,4 +1,4 @@
-package com.example.snakegame.ui
+package snake.game.snakegame.ui
 
 import android.content.Context
 import android.os.VibrationEffect
@@ -36,10 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.snakegame.GameViewModel
-import com.example.snakegame.GameViewModel.Companion.BOARD_SIZE
-import com.example.snakegame.R
-import com.example.snakegame.State
+import snake.game.snakegame.GameViewModel
+import snake.game.snakegame.GameViewModel.Companion.BOARD_SIZE
+import snake.game.snakegame.R
+import snake.game.snakegame.State
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

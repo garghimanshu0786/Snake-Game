@@ -1,4 +1,4 @@
-package com.example.snakegame.ui.theme
+package snake.game.snakegame.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

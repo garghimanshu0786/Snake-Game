@@ -1,4 +1,4 @@
-package com.example.snakegame
+package snake.game.snakegame
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.snakegame.ui.Snake
-import com.example.snakegame.ui.theme.SnakeGameTheme
+import snake.game.snakegame.ui.Snake
+import snake.game.snakegame.ui.theme.SnakeGameTheme
 
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {

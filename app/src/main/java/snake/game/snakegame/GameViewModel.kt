@@ -1,4 +1,4 @@
-package com.example.snakegame
+package snake.game.snakegame
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -66,14 +66,23 @@ class GameViewModel : ViewModel() {
 		delayTime = 400L
 		move = Pair(1, 0)
 		viewModelScope.launch {
+			val snake = listOf(getRandomPair())
 			mutableState.emit(
 				State(
-					food = getRandomPair(),
-					snake = listOf(getRandomPair()),
+					snake = snake,
+					food = getFoodPosition(snake),
 					score = 0
 				)
 			)
 		}
+	}
+
+	private fun getFoodPosition(snake: List<Pair<Int, Int>>): Pair<Int, Int> {
+		var pair = getRandomPair()
+		while (snake.contains(pair)) {
+			pair = getRandomPair()
+		}
+		return pair
 	}
 
 	init {
@@ -101,11 +110,7 @@ class GameViewModel : ViewModel() {
 						}
 
 						val food = if (newPosition == it.food) {
-							var pair = getRandomPair()
-							while (it.snake.contains(pair)) {
-								pair = getRandomPair()
-							}
-							pair
+							getFoodPosition(it.snake)
 						} else {
 							it.food
 						}

@@ -1,4 +1,4 @@
-package com.example.snakegame
+package snake.game.snakegame
 
 import org.junit.Test
 
